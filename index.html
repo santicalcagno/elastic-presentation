@@ -1,50 +1,152 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+	<title>reveal.js</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
+	<!-- My own css -->
+	<link rel="stylesheet" href="/css/myown.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+	var link = document.createElement( 'link' );
+	link.rel = 'stylesheet';
+	link.type = 'text/css';
+	link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+	document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				http://engineering.viki.com/blog/2015/log-processing-at-scale-elk-cluster-at-25k-events-per-second/
+			</section>
+			<section>
+				<h1>The ELK Stack</h1>
+				<h3>Santiago Javier Calcagno</h3>
+				<h3>Karlsruhe Institute of Technology</h3>
+				<h4>Seminar „Big Data Tools“</h4>
+			</section>
+			<section>
+				<h1>What is the <strike>ELK</strike> Elastic Stack?</h1>
+				<div class="table">
+					<div class="row">
+						<div class="col-33">
+							<img class="round-icon" src="icon-logstash-bb.svg"
+							alt="Logstash Logo">
+							<h4>Logstash</h4>
+							<p>Data processing</p>
+						</div>
+						<div class="col-33">
+							<img class="round-icon" src="icon-elasticsearch-bb.svg"
+							alt="Elasticsearch Logo">
+							<h4>Elasticsearch</h4>
+							<p>Search engine</p>
+						</div>
+						<div class="col-33">
+							<img class="round-icon" src="icon-kibana-bb.svg"
+							alt="Kibana Logo">
+							<h4>Kibana</h4>
+							<p>Visualization tool</p>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section>
+				<img class="round-icon-hero" src="icon-elasticsearch-bb.svg"
+				alt="Elasticsearch Logo">
+				<h1>Elasticsearch</h1>
+				<p>Based on Apache Lucene</p>
+				<p>High scalability/availability</p>
+				<p>Document-oriented (JSON)</p>
+				<p><b>Not</b> a primary store (well...)</p>
+				<p><a href="https://buildingvts.com/elasticsearch-architectural-overview-a35d3910e515#.k0v11w3j7">acá</a></p>
+			</section>
+			<section>
+				<img class="round-icon-hero" src="icon-logstash-bb.svg"
+				alt="Logstash Logo">
+				<h1>Logstash</h1>
+				<p>Log data intake, processing, and output</p>
+				<p>Lots of input/filter/output plugins</p>
+				<p>Makes extracting high-value data from logs <b>a lot</b> easier</p>
+				<p><a href="https://www.elastic.co/guide/en/logstash/current/pipeline.html">aca</a> <a href="https://www.elastic.co/guide/en/logstash/current/deploying-and-scaling.html">aca</a></p>
+			</section>
+			<section data-background-image="kibana-features.gif" data-state="dark-bg">
+				<img class="round-icon-hero" src="icon-kibana-bb.svg"
+				alt="Kibana Logo">
+				<h1>Kibana</h1>
+				<p>Pie charts, bar graphs, maps, scatter plots...</p>
+				<p>Customizable dashboards</p>
+			</section>
+			<section>
+				<h1>General architecture</h1>
+			</section>
+			<section data-background-image="all-logos.png">
+				<h1>Use cases</h1>
+				<p>More use cases <a href="https://www.elastic.co/use-cases">here
+				</a></p>
+			</section>
+			<section>
+				<h1>Evolution of the logstash pipeline</h1>
+			</section>
+			<section>
+				<h1>Objective</h1>
+			</section>
+			<section>
+				<h1>Tests and tools</h1>
+			</section>
+			<section>
+				<h1>Results</h1>
+			</section>
+			<section>
+				<h1>Conclusion</h1>
+			</section>
+			<section>
+				<h1>Questions?</h1>
+			</section>
+			<section>
+				<h1>References</h1>
+			</section>
+			<section>
+				<h1><b>Thank you!</b></h1>
+			</section>
 		</div>
+	</div>
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+	<script src="Chart.bundle.min.js"></script>
 
-		<script>
-			// More info https://github.com/hakimel/reveal.js#configuration
-			Reveal.initialize({
-				history: true,
+	<script>
+	// More info https://github.com/hakimel/reveal.js#configuration
+	Reveal.initialize({
+		history: true,
 
-				// More info https://github.com/hakimel/reveal.js#dependencies
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+		// More info https://github.com/hakimel/reveal.js#dependencies
+		dependencies: [
+			{ src: 'plugin/markdown/marked.js' },
+			{ src: 'plugin/markdown/markdown.js' },
+			{ src: 'plugin/notes/notes.js', async: true },
+			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+		]
+	});
+	</script>
+	<div id="myLogo" style="background: url(kit.png);
+	position: absolute;
+	top: 30px;
+	right: 30px;
+	width: 250px;
+	height: 90px;
+	background-repeat: no-repeat;">
+</div>
+</body>
 </html>
