@@ -28,32 +28,29 @@
 	<div class="reveal">
 		<div class="slides">
 			<section>
-				http://engineering.viki.com/blog/2015/log-processing-at-scale-elk-cluster-at-25k-events-per-second/
-			</section>
-			<section>
 				<h1>The ELK Stack</h1>
 				<h3>Santiago Javier Calcagno</h3>
 				<h3>Karlsruhe Institute of Technology</h3>
 				<h4>Seminar „Big Data Tools“</h4>
 			</section>
 			<section>
-				<h1>What is the <strike>ELK</strike> Elastic Stack?</h1>
+				<h2>What is the <strike>ELK</strike> Elastic Stack?<sup class="refe">1</sup></h2>
 				<div class="table">
 					<div class="row">
 						<div class="col-33">
-							<img class="round-icon" src="icon-logstash-bb.svg"
+							<img class="round-icon" src="img/icon-logstash-bb.svg"
 							alt="Logstash Logo">
 							<h4>Logstash</h4>
 							<p>Data processing</p>
 						</div>
 						<div class="col-33">
-							<img class="round-icon" src="icon-elasticsearch-bb.svg"
+							<img class="round-icon" src="img/icon-elasticsearch-bb.svg"
 							alt="Elasticsearch Logo">
 							<h4>Elasticsearch</h4>
 							<p>Search engine</p>
 						</div>
 						<div class="col-33">
-							<img class="round-icon" src="icon-kibana-bb.svg"
+							<img class="round-icon" src="img/icon-kibana-bb.svg"
 							alt="Kibana Logo">
 							<h4>Kibana</h4>
 							<p>Visualization tool</p>
@@ -62,59 +59,288 @@
 				</div>
 			</section>
 			<section>
-				<h1>General architecture</h1>
+				<section>
+					<h2>General architecture</h2>
+					<img class="nobg" src="img/arch1.svg">
+				</section>
+				<section>
+					<h2>Scaling the stack<sup class="refe">2</sup></h2>
+					<img class="nobg" src="img/arch2.svg">
+				</section>
 			</section>
-			<section data-background-image="all-logos.png">
+			<section data-background-image="img/all-logos.png">
 				<h1>Use cases</h1>
-				<p>More use cases <a href="https://www.elastic.co/use-cases">here
-				</a></p>
+				<p>More use cases <a href="https://www.elastic.co/use-cases">here.
+				</a><sup class="refe">3</sup></p>
 			</section>
 			<section>
-				<h1>Evolution of the logstash pipeline</h1>
+				<section>
+					<h2>Evolution of the logstash pipeline<sup class="refe">4</sup></h2>
+					<img class="nobg" src="img/pipeline2.png" alt="Logstash pipeline, 1.2.2 to 2.1">
+					<p>Logstash pipeline, versions 1.2.2 to 2.1</p>
+				</section>
+				<section>
+					<img class="nobg" src="img/pipeline3.png" alt="Logstash pipeline, 1.2.2 to 2.1">
+					<p>Logstash pipeline, version 2.2</p>
+				</section>
+				<section>
+					<img class="nobg" src="img/pipeline4.png" alt="Logstash pipeline, 1.2.2 to 2.1">
+					<p>Logstash pipeline, versions 5.0 and newer</p>
+				</section>
 			</section>
 			<section>
-				<h1>Objective</h1>
+				<h2>Goal</h2>
+				<p>Analyze how the number of pipeline workers and the batch size affect the indexing rate (in a specific system).</p>
+				<ul>
+					<li>Intel® Core™ i5-2520M</li>
+					<li>16GB RAM DDR3-1866</li>
+					<li>Samsung® EVO™ 250GiB mSATA SSD</li>
+					<li>Arch Linux, kernel 4.8.13-1</li>
+					<li>Elastic stack version 5.1</li>
+				</ul>
 			</section>
 			<section>
-				<h1>Tests and tools</h1>
+				<section>
+					<h2>Tests and tools</h2>
+					<pre><code class="hljs" data-trim contenteditable>
+for w in "${W_VALUES[@]}"
+do
+	for b in "${B_VALUES[@]}"
+	do
+		sed -i -e "s/-w [0-9]*/-w $w/" docker-compose.yml
+		sed -i -e "s/-b [0-9]*/-b $b/" docker-compose.yml
+		docker-compose up &
+		DOCKER_PID=$!
+		sh ./gatherdata.sh &
+		GATHER_PID=$!
+		python jlog.py
+		kill $GATHER_PID &&
+		curl -s -XDELETE 'http://localhost:9200/_all'
+		kill $DOCKER_PID
+	done
+done
+					</code></pre>
+					<p>run.sh</p>
+				</section>
+				<section>
+					<pre class="stretch"><code class="hljs" data-trim contenteditable>
+s.connect((TCP_IP, TCP_PORT))
+for _ in range(0, MAX_LOGS):
+	method = random.choice(methods)
+	jlog = {
+		'ip_src' : random.choice(ip_srcs),
+		'websv' : random.choice(websvs),
+		'method' : method,
+		'query' : random.choice(gets) if method == 'GET'
+			else random.choice(posts),
+		'protocol' : random.choice(protocols),
+		'response' : random.choice(responses),
+		'user' : ''.join(random.choice(
+			string.ascii_letters + string.digits)
+			for _ in range(6)),
+		'usertype' : random.choice(usertypes),
+		'user_ip' : ".".join(map(str, (random.randint(0, 255)
+			for _ in range(4)))),
+	}
+	msg = json.dumps(jlog) + '\n'
+	s.send(msg.encode('utf-8'))
+s.close()
+					</code></pre>
+					<p>jlog.py</p>
+				</section>
 			</section>
 			<section>
-				<h1>Results</h1>
+				<section>
+					<h2>Results</h2>
+					<canvas data-chart="line">
+Batch size 16,  470 ,755 ,814 ,842 ,809 ,838 ,811 ,808 ,828 ,819 ,811 ,807 ,822 ,812 ,778 ,789
+Batch size 32,  815 ,1390,1621,1611,1600,1636,1584,1602,1657,1652,1629,1616,1565,1576,1538,1621
+Batch size 64,  1234,2116,2460,2489,2525,2541,2418,2533,2455,2418,2368,2385,2412,2290,2361,2335
+Batch size 125, 1607,2648,2923,3000,2958,2859,2852,2712,2668,2671,2673,2594,2524,2527,2498,2494
+Batch size 250, 1966,2965,3039,3030,3030,2997,2899,2872,2880,2917,2834,2823,2736,2762,2741,2755
+Batch size 500, 2310,2914,3128,3002,3054,3009,3003,3061,3004,2974,2955,2970,2902,2919,2878,2896
+Batch size 1000,2446,2760,3032,3064,3077,3098,3064,3031,3048,3038,2973,2964,3047,2914,2907,2941
+Batch size 1250,2363,3006,3070,2984,3061,3068,3046,3135,3080,3064,3041,3054,3014,2959,2921,2964
+<!--
+{
+	"data" : {
+		"labels" : ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"],
+		"datasets" : [{ "borderColor": "#86c1b9"}, { "borderColor": "#dc9656" },
+			{ "borderColor": "#f7ca88" }, { "borderColor": "#a1b56c" },
+			{ "borderColor": "#ab4642" }, { "borderColor": "#7cafc2" },
+			{ "borderColor": "#ba8baf" }, { "borderColor": "#a16946" } ]
+	},
+	"options" : {
+  	"scales" : {
+    	"yAxes": [{
+      	"scaleLabel": {
+        	"display": true,
+        	"labelString": "Average indexing rate (logs/s)"
+      	}
+    	}],
+			"xAxes": [{
+      	"scaleLabel": {
+        	"display": true,
+        	"labelString": "# of workers"
+      	}
+    	}]
+  	}
+	}
+}
+-->
+	</canvas>
+					<p>Batch size comparison</p>
+				</section>
+				<section>
+					<canvas data-chart="line">
+w1,  470, 815 ,1234,1607,1966,2310,2446,2363
+w2,  755 ,1390,2116,2648,2965,2914,2760,3006
+w3,  814 ,1621,2460,2923,3039,3128,3032,3070
+w4,  842 ,1611,2489,3000,3030,3002,3064,2984
+w5,  809 ,1600,2525,2958,3030,3054,3077,3061
+w6,  838 ,1636,2541,2859,2997,3009,3098,3068
+w7,  811 ,1584,2418,2852,2899,3003,3064,3046
+w8,  808 ,1602,2533,2712,2872,3061,3031,3135
+w9,  828 ,1657,2455,2668,2880,3004,3048,3080
+w10, 819 ,1652,2418,2671,2917,2974,3038,3064
+w11, 811 ,1629,2368,2673,2834,2955,2973,3041
+w12, 807 ,1616,2385,2594,2823,2970,2964,3054
+w13, 822 ,1565,2412,2524,2736,2902,3047,3014
+w14, 812 ,1576,2290,2527,2762,2919,2914,2959
+w15, 778 ,1538,2361,2498,2741,2878,2907,2921
+w16, 789 ,1621,2335,2494,2755,2896,2941,2964
+<!--
+{
+	"data" : {
+		"labels" : ["16", "32", "64", "125", "250", "500", "1000", "1250"],
+		"datasets" : [{ "borderColor": "#86c1b9", "borderDash": ["5","10"]}, { "borderColor": "#dc9656" },
+			{ "borderColor": "#f7ca88", "borderDash": ["5","10"] }, { "borderColor": "#a1b56c" },
+			{ "borderColor": "#ab4642", "borderDash": ["5","10"] }, { "borderColor": "#7cafc2" },
+			{ "borderColor": "#ba8baf", "borderDash": ["5","10"] }, { "borderColor": "#a16946" },
+			{ "borderColor": "#86c1b9"}, { "borderColor": "#dc9656", "borderDash": ["5","10"] },
+			{ "borderColor": "#f7ca88" }, { "borderColor": "#a1b56c", "borderDash": ["5","10"] },
+			{ "borderColor": "#ab4642" }, { "borderColor": "#7cafc2", "borderDash": ["5","10"] },
+			{ "borderColor": "#ba8baf" }, { "borderColor": "#a16946", "borderDash": ["5","10"] }]
+	},
+	"options" : {
+  	"scales" : {
+    	"yAxes": [{
+      	"scaleLabel": {
+        	"display": true,
+        	"labelString": "Average indexing rate (logs/s)"
+      	}
+    	}],
+			"xAxes": [{
+      	"scaleLabel": {
+        	"display": true,
+        	"labelString": "Batch size (entries)"
+      	}
+    	}]
+  	}
+	}
+}
+-->
+	</canvas>
+					<p>Output workers comparison</p>
+				</section>
+				<section>
+					<h3>Some special cases</h3>
+					<div class="table">
+						<div class="row">
+							<div class="col-33">
+								<img src="img/ixb16.png">
+								<p>Batch size 16</p>
+							</div>
+							<div class="col-33">
+								<img src="img/ixb32.png">
+								<p>Batch size 32</p>
+							</div>
+							<div class="col-33">
+								<img src="img/ixb125.png">
+								<p>Batch size 125</p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-33">
+								<img src="img/ix1w.png">
+								<p>1 worker</p>
+							</div>
+							<div class="col-33">
+								<img src="img/ix2w.png">
+								<p>2 workers</p>
+							</div>
+							<div class="col-33">
+								<img src="img/ix4w.png">
+								<p>4 workers</p>
+							</div>
+						</div>
+					</div>
+				</section>
 			</section>
 			<section>
-				<h1>Conclusion</h1>
+				<h2>Conclusion</h2>
+				<ul>
+					<li>For this system, w ~ 4 and b ~ 150</li>
+					<li>Effect of message queue and more Elasticsearch nodes</li>
+					<li>Generic testbed for more complex scenarios</li>
+					<li><a href="https://github.com/santicalcagno/docker-elk">Try it yourself!</a></li>
+				</ul>
 			</section>
 			<section>
-				<h1>Questions?</h1>
+				<h2>Questions?</h2>
 			</section>
 			<section>
-				<h1>References</h1>
-			</section>
-			<section>
-				<h1><b>Thank you!</b></h1>
+				<h2><b>Thank you!</b></h2>
+				<div class="footer">
+					<p>References</p>
+					<ol>
+						<li>Product Overview. (n.d.). Retrieved January 03, 2017, from https://www.elastic.co/products</li>
+						<li>Deploying and Scaling Logstash | Logstash Reference [5.1] | Elastic. (n.d.). Retrieved January 03, 2017, from https://www.elastic.co/guide/en/logstash/current/deploying-and-scaling.html</li>
+						<li>Use Cases. (n.d.). Retrieved January 08, 2017, from https://www.elastic.co/use-cases</li>
+						<li>Logstash Pipeline Architecture Discussion. (2016, July 21). Retrieved January 03, 2017, from https://www.youtube.com/watch?v=FPLHS9Pmgk0</li>
+					</ol>
+				</div>
 			</section>
 		</div>
 	</div>
 
 	<script src="lib/js/head.min.js"></script>
 	<script src="js/reveal.js"></script>
-	<script src="Chart.bundle.min.js"></script>
 
 	<script>
 	// More info https://github.com/hakimel/reveal.js#configuration
 	Reveal.initialize({
 		history: true,
 
+		chart: {
+      defaults: {
+          global: {
+							defaultFontColor: "#FFF",
+							defaultFontFamily: "Source Sans Pro",
+							elements: {
+								line: {
+									fill: false
+								}
+							}
+          },
+          scale: {
+              gridLines: { color: "#333", zeroLineColor: "#333" },
+          }
+        },
+    },
+
 		// More info https://github.com/hakimel/reveal.js#dependencies
 		dependencies: [
 			{ src: 'plugin/markdown/marked.js' },
 			{ src: 'plugin/markdown/markdown.js' },
 			{ src: 'plugin/notes/notes.js', async: true },
+			{ src: 'plugin/chart/Chart.min.js' },
+      { src: 'plugin/chart/csv2chart.js' },
 			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
 		]
 	});
 	</script>
-	<div id="myLogo" style="background: url(kit.png);
+	<div id="myLogo" style="background: url(img/kit.png);
 	position: absolute;
 	top: 30px;
 	right: 30px;
